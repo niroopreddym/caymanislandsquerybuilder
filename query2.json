@@ -1,0 +1,43 @@
+{
+  "tables": [
+    "table0",
+    "table1",
+    "table2"
+  ],
+  "joinOn": [
+    {
+      "joinType": "inner",
+      "key": {
+        "table": "table0",
+        "column": "column0"
+      },
+      "value": {
+        "table": "table1",
+        "column": "column1"
+      }
+    },
+    {
+      "joinType": "inner",
+      "key": {
+        "table": "table1",
+        "column": "column1"
+      },
+      "value": {
+        "table": "table2",
+        "column": "column2"
+      }
+    }
+  ],
+  "where": [
+    {
+      "operator": "GREATERTHAN",
+      "fieldName": "table0.column0",
+      "fieldValue": "12"
+    },
+    {
+      "operator": "Equal",
+      "fieldName": "table2.column2",
+      "fieldValue": "25"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"tableName":"test", "columns":[{"operator":"GREATERTHAN","fieldName":"column1","fieldValue":"value"},{"operator":"Equal","fieldName":"column2","fieldValue":"value"}]}
