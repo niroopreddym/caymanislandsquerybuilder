@@ -2,6 +2,7 @@ package querybuilder
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -29,24 +30,87 @@ func (pattern *JoinQueryBuilder) GetQueryPattern(queryData []byte) string {
 		log.Panic(err)
 	}
 
-	queryString := pattern.buildJoinQuery(input)
-	return queryString
+	query := ""
+	responseMap := map[string]models.QueryRequest{}
+	for _, value := range input.Queries {
+		_, prevQuery, queryID := containsQuery(value.Tables, responseMap)
+
+		queryString := pattern.buildJoinQuery(value, prevQuery, queryID)
+		responseMap[value.QueryID] = models.QueryRequest{
+			QueryID:         value.QueryID,
+			OutColsDataType: make([]string, len(value.OutAttributes)),
+			Query:           queryString,
+		}
+
+		query = queryString
+	}
+
+	// data := combineSeriesOfQueries(input, responseMap)
+	// byteArr, _ := json.Marshal(responseMap)
+	return query
 }
 
-func (pattern *JoinQueryBuilder) buildJoinQuery(queryData models.Input) string {
+func containsQuery(tables []string, responseMap map[string]models.QueryRequest) (bool, string, string) {
+	for _, val := range tables {
+		if value, isExists := responseMap[val]; isExists {
+			return true, value.Query, value.QueryID
+		}
+	}
+	return false, "", ""
+}
+
+// func combineSeriesOfQueries(input models.Input, responseMap map[int]models.QueryRequest) string {
+// 	for _, val := range responseMap {
+
+// 	}
+// }
+
+func (pattern *JoinQueryBuilder) buildJoinQuery(queryData models.Query, previousQuery string, previousQueryID string) string {
+	//build on prevQuery If it Exists
+	pattern.QueryString = embedPreviousQToCTE(previousQuery, previousQueryID)
+
 	namesMap := getTableAliasMap(queryData.Tables)
-	pattern.QueryString = "select * from "
+	pattern.QueryString = pattern.selectOutAttributes(queryData, namesMap)
 	flag := true
+
 	for _, value := range queryData.JoinOn {
 		pattern.QueryString = pattern.buildSubQuery(value, namesMap, flag)
 		flag = false
 	}
 
 	query := pattern.getConditionalQueryStr(queryData, namesMap)
+
+	fmt.Println(query)
 	return query
 }
 
-func (pattern *JoinQueryBuilder) getConditionalQueryStr(queryData models.Input, namesMap map[string]string) string {
+func embedPreviousQToCTE(previousQuery string, previousQueryID string) string {
+	if previousQuery == "" {
+		return ""
+	}
+
+	return "with " + previousQueryID + " as (" + previousQuery + ")"
+}
+
+func (pattern *JoinQueryBuilder) selectOutAttributes(queryData models.Query, namesMap map[string]string) string {
+	if len(queryData.OutAttributes) == 0 {
+		return pattern.QueryString + "select * from "
+	}
+
+	prefixColSelection := "select "
+	for index, value := range queryData.OutAttributes {
+		prefixColSelection += namesMap[value.TableName] + "." + value.ColumnName
+		if index != len(queryData.OutAttributes)-1 {
+			prefixColSelection += " as " + value.Alias + ","
+		} else {
+			prefixColSelection += " from "
+		}
+	}
+
+	return pattern.QueryString + prefixColSelection
+}
+
+func (pattern *JoinQueryBuilder) getConditionalQueryStr(queryData models.Query, namesMap map[string]string) string {
 	conditionalQueryBuilder := NewConditionalQueryBuilder(pattern.QueryString)
 
 	data := alterTheTableNameToAlias(queryData.Where, namesMap)

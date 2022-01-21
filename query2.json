@@ -1,43 +1,84 @@
 {
-  "tables": [
-    "table0",
-    "table1",
-    "table2"
-  ],
-  "joinOn": [
+  "queries": [
     {
-      "joinType": "inner",
-      "key": {
-        "table": "table0",
-        "column": "column0"
-      },
-      "value": {
-        "table": "table1",
-        "column": "column1"
-      }
+      "queryId": "query1",
+      "outAttributes": [
+        {
+          "table": "employee",
+          "column": "id",
+          "alias": "EmployeeId"
+        },
+        {
+          "table": "employee",
+          "column": "name",
+          "alias": "Name"
+        },
+        {
+          "table": "department",
+          "column": "id",
+          "alias": "DeptId"
+        },
+        {
+          "table": "employee",
+          "column": "salary",
+          "alias": "salary"
+        }
+      ],
+      "tables": ["employee", "department", "role"],
+      "joinOn": [
+        {
+          "joinType": "inner",
+          "key": {
+            "table": "employee",
+            "column": "id"
+          },
+          "value": {
+            "table": "department",
+            "column": "id"
+          }
+        }
+      ]
     },
     {
-      "joinType": "inner",
-      "key": {
-        "table": "table1",
-        "column": "column1"
-      },
-      "value": {
-        "table": "table2",
-        "column": "column2"
-      }
-    }
-  ],
-  "where": [
-    {
-      "operator": "GREATERTHAN",
-      "fieldName": "table0.column0",
-      "fieldValue": "12"
-    },
-    {
-      "operator": "Equal",
-      "fieldName": "table2.column2",
-      "fieldValue": "25"
+      "queryId": "query2",
+      "tables": ["query1", "department"],
+      "outAttributes": [
+        {
+          "table": "query1",
+          "column": "EmployeeId",
+          "alias": "EmployeeId"
+        },
+        {
+          "table": "department",
+          "column": "id",
+          "alias": "DeptId"
+        },
+        {
+          "table": "query1",
+          "column": "salary",
+          "alias": "salary"
+        }
+      ],
+      "joinOn": [
+        {
+          "joinType": "inner",
+          "key": {
+            "table": "query1",
+            "column": "DeptId"
+          },
+          "value": {
+            "table": "department",
+            "column": "id"
+          }
+        }
+      ],
+      "where": [
+        {
+          "operator": "BETWEEN",
+          "fieldName": "query1.salary",
+          "fieldValue": "100 AND 200"
+        }
+      ]
     }
   ]
 }

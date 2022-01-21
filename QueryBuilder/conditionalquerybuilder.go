@@ -34,7 +34,10 @@ func (pattern *ConditionalQueryBuilder) GetQueryPattern(queryData []byte) string
 }
 
 func (pattern *ConditionalQueryBuilder) buildConditionalQuery(queryData models.TableQuery) string {
-	pattern.QueryString = pattern.QueryString + " where "
+	if len(queryData.Columns) > 0 {
+		pattern.QueryString = pattern.QueryString + " where "
+	}
+
 	for index, value := range queryData.Columns {
 		pattern.buildSubQuery(value)
 		if index != len(queryData.Columns)-1 {
@@ -62,5 +65,9 @@ func (pattern *ConditionalQueryBuilder) withOperator(column models.ConditionalQu
 }
 
 func (pattern *ConditionalQueryBuilder) withFieldValue(column models.ConditionalQueryData) {
+	if enums.StringToOperation[strings.ToUpper(column.Operator)] == enums.EQUAL {
+		pattern.QueryString += "'" + column.FieldValue + "'"
+		return
+	}
 	pattern.QueryString += column.FieldValue + " "
 }

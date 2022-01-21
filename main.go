@@ -12,12 +12,13 @@ type Driver struct {
 }
 
 func main() {
+	inputFileName := "query2.json"
 	driver := Driver{
-		Handler: handlers.NewHandler(),
+		Handler: handlers.NewHandler(inputFileName),
 	}
 
-	output1 := driver.Handler.Assignment1()
-	fmt.Println(output1)
+	// output1 := driver.Handler.Assignment1()
+	// fmt.Println(output1)
 
 	output2 := driver.Handler.Assignment2()
 	fmt.Println(output2)

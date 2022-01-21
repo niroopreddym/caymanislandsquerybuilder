@@ -1,0 +1,15 @@
+version: "3"
+services:
+  caymandb:
+    image: postgres
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    volumes:
+      - cayman-data:/var/lib/postgresql/data
+      - ./migrations/:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"
+volumes:
+  cayman-data:
+    driver: local
