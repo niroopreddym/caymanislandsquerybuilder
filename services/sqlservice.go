@@ -33,26 +33,25 @@ func (service *DatabaseService) Read(query string) ([]map[int]string, error) {
 	lstResults := []map[int]string{}
 	for rows.Next() {
 		cols1, err := rows.Values()
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		resultMap := map[int]string{}
 		for index, val := range cols1 {
 			val1 := interface{}(val)
 			switch t := val1.(type) {
 			case int, int32, int64:
-				fmt.Println(t)
 				resultMap[index] = strconv.Itoa(int(t.(int32)))
 			case string:
-				fmt.Println(t)
 				resultMap[index] = t
 			default:
-				fmt.Println(t)
+				fmt.Println("default case:", t)
 			}
 		}
 
 		lstResults = append(lstResults, resultMap)
 	}
-
-	fmt.Println(lstResults)
 
 	return lstResults, nil
 }

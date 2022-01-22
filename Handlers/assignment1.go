@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 
+	models "github.com/niroopreddym/caymanislandsquerybuilder/Models"
 	querybuilder "github.com/niroopreddym/caymanislandsquerybuilder/QueryBuilder"
 	"github.com/niroopreddym/caymanislandsquerybuilder/services"
 )
@@ -47,14 +49,37 @@ func (handler *AssignemntHandler) Assignment2() string {
 
 	queryRequest := handler.JoinBuilder.GetQueryPattern(queryData)
 
-	handler.queryTheSQLDB(queryRequest)
-	return queryRequest
+	queryResponse := handler.queryTheSQLDB(queryRequest, queryData)
+	response, _ := json.Marshal(queryResponse)
+	return string(response)
 }
 
-//Response ...
-
-func (handler *AssignemntHandler) queryTheSQLDB(queryRequest string) {
+func (handler *AssignemntHandler) queryTheSQLDB(queryRequest string, queryData []byte) []map[string]string {
 	data, err := handler.DatabaseService.Read(queryRequest)
 	fmt.Println(err)
-	fmt.Println(data)
+
+	//map the data to outAttributes
+	response := mapOutVariablesToResponse(data, queryData)
+	return response
+}
+
+func mapOutVariablesToResponse(data []map[int]string, queryData []byte) []map[string]string {
+	input := models.Input{}
+	err := json.Unmarshal(queryData, &input)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	requiredOutAttributes := input.Queries[len(input.Queries)-1].OutAttributes
+
+	response := []map[string]string{}
+	for _, dataMap := range data {
+		individualResponse := map[string]string{}
+		for index, value := range dataMap {
+			individualResponse[requiredOutAttributes[index].Alias] = value
+		}
+		response = append(response, individualResponse)
+	}
+
+	return response
 }
