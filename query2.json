@@ -79,6 +79,40 @@
           "fieldValue": "100 AND 200"
         }
       ]
+    },
+    {
+      "queryId": "query3",
+      "tables": ["query2", "department"],
+      "outAttributes": [
+        {
+          "table": "query2",
+          "column": "EmployeeId",
+          "alias": "EmployeeId"
+        },
+        {
+          "table": "department",
+          "column": "deptname",
+          "alias": "DeptName"
+        },
+        {
+          "table": "query2",
+          "column": "salary",
+          "alias": "salary"
+        }
+      ],
+      "joinOn": [
+        {
+          "joinType": "inner",
+          "key": {
+            "table": "query2",
+            "column": "DeptId"
+          },
+          "value": {
+            "table": "department",
+            "column": "id"
+          }
+        }
+      ]
     }
   ]
 }
